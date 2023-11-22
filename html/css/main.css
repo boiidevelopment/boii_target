@@ -1,0 +1,91 @@
+/*----------------------------*/
+/*---- BOII | DEVELOPMENT ----*/
+/*----------------------------*/
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: none !important;
+}
+
+#main_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Roboto';
+}
+
+#target {
+    display: none;
+    font-size: var(--target-icon-size);
+}
+
+
+.active {
+    color: var(--active-colour);
+    text-shadow: var(--active-textshadow);
+}
+
+.inactive {
+    color: var(--inactive-colour);
+    text-shadow: var(--inactive-textshadow);
+}
+
+.actions.left, 
+.actions.right {
+    display: flex;
+    flex-direction: column;
+    margin: 0 10px;
+    flex: 1;
+}
+
+.actions.left {
+    align-items: flex-end;
+}
+
+.actions.right {
+    align-items: flex-start; 
+}
+
+.action {
+    border-radius: 15px;
+    padding: 10px;
+    font-weight: bold;
+    display: flex;
+    position: relative;
+}
+
+.action .label_container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
+    color: var(--dropdown-colour);
+    text-shadow: var(--dropdown-textshadow);
+    font-size: var(--dropdown-font-size);
+    white-space: nowrap;
+    width: fit-content;
+    border-radius: 10px;
+}
+
+.action .label_container i {
+    margin: 0 10px;
+}
+
+.action:hover .label_container {
+    color: var(--dropdown-hover-colour);
+    text-shadow: var(--dropdown-hover-textshadow);
+}
+
+.action i {
+    color: var(--dropdown-icon-colour);
+}
+
+.action:hover i {
+    color: var(--dropdown-icon-hover-colour);
+}
