@@ -11,6 +11,11 @@ targets.vehicles = targets.vehicles or {}
 targets.peds = targets.peds or {}
 targets.players = targets.players or {}
 targets.zones = targets.zones or {}
+targets.zones.circle = targets.zones.circle or {}
+targets.zones.box = targets.zones.box or {}
+targets.zones.sphere = targets.zones.sphere or {}
+targets.zones.entity = targets.zones.entity or {}
+targets.zones.models = targets.zones.models or {}
 
 -- Testing stuff -- can be removed if removing `client/test.lua` or just leave false and ignore.. will be removed once script is no longer a W.I.P
 config.testing = true
