@@ -17,7 +17,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Drivers Door',
                     icon = 'fa-solid fa-door-closed',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 0 },
                     can_interact = function(vehicle)
@@ -35,7 +35,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Passenger Door',
                     icon = 'fa-solid fa-door-closed',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 1 },
                     can_interact = function(vehicle)
@@ -53,7 +53,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Rear Driver\'s Door',
                     icon = 'fa-solid fa-door-closed',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 2 },
                     can_interact = function(vehicle)
@@ -71,7 +71,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Rear Passenger Door',
                     icon = 'fa-solid fa-door-closed',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 3 },
                     can_interact = function(vehicle)
@@ -89,7 +89,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Bonnet',
                     icon = 'fa-solid fa-car-side',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 4 },
                     can_interact = function(vehicle)
@@ -107,7 +107,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Toggle Boot',
                     icon = 'fa-solid fa-car-rear',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:toggle_vehicle_door',  
                     params = { door_index = 5 },
                     can_interact = function(vehicle)
@@ -117,7 +117,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Push Vehicle',
                     icon = 'fa-solid fa-hand-rock',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:push_vehicle',
                     params = { is_front = false },
                     can_interact = function(vehicle)
@@ -135,7 +135,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Flip Vehicle',
                     icon = 'fa-solid fa-undo',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:flip_vehicle',
                     can_interact = function(vehicle)
                         return not IsVehicleOnAllWheels(vehicle)
@@ -144,7 +144,7 @@ if config.default_actions.vehicles then
                 {
                     label = 'Push Vehicle',
                     icon = 'fa-solid fa-hand-rock',
-                    action_type = 'client_event',
+                    action_type = 'client',
                     action = 'boii_target:cl:push_vehicle',
                     params = { is_front = true },
                     can_interact = function(vehicle)
