@@ -2,6 +2,9 @@
 --<!>-- BOII | DEVELOPMENT --<!>--
 ----------------------------------
 
+-- Import utils
+utils = exports['boii_utils']:get_utils()
+
 -- Locals
 local player_ped = PlayerPedId()
 local is_targeting = false
