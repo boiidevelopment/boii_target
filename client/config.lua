@@ -22,9 +22,6 @@ config.testing = true
 testing_peds = {}
 testing_ents = {}
 
--- Import utils
-utils = exports['boii_utils']:get_utils()
-
 -- Debug toggle
 config.debug = false -- Toggle debugging stuff
 
