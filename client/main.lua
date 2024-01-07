@@ -331,22 +331,26 @@ local function add_sphere_zone(options)
     end
 end
 
--- Function to add a entity zone
+-- Function to add an entity zone with size modifier
 local function add_entity_zone(entities, options)
     targets.zones.entity = targets.zones.entity or {}
+    local size_modifier = options.modifiers or {x = 0.0, y = 0.0, z = 0.0}
     for _, entity in ipairs(entities) do
         if DoesEntityExist(entity) then
             local min, max = GetModelDimensions(GetEntityModel(entity))
-            local length = max.y - min.y
-            local width = max.x - min.x
-            local height = max.z - min.z
+            local length = (max.y - min.y) * size_modifier.y
+            local width = (max.x - min.x) * size_modifier.x
+            local height = (max.z - min.z) * size_modifier.z
             local pos = GetEntityCoords(entity)
+
             options.entity = entity
             options.coords = pos
             options.length = length
             options.width = width
             options.height = height
+
             targets.zones.entity[entity] = options
+
             if options.debug then
                 draw_debug('entity', options)
             end
