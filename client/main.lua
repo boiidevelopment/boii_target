@@ -380,9 +380,9 @@ end)
 -- Register NUI callback for triggering action events
 RegisterNUICallback('trigger_action_event', function(data)
     if config.debug then debug_log('debug', 'trigger_action_event fired with data: '..json.encode(data)) end
-    if data.action_type == 'server_event' then
+    if data.action_type == 'server' then
         TriggerServerEvent(data.action, data.params)
-    elseif data.action_type == 'client_event' then
+    elseif data.action_type == 'client' then
         TriggerEvent(data.action, data.params)
     end
     SetNuiFocus(false, false)
