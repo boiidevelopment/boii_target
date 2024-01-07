@@ -17,7 +17,7 @@ if config.testing then
             {
                 label = "Test Circle Zone",
                 icon = "fa-solid fa-circle",
-                action_type = "client_event",
+                action_type = "client",
                 action = "test_circle_action",
                 params = {},
                 can_interact = function(player) return true end,
@@ -41,7 +41,7 @@ if config.testing then
             {
                 label = "Test Box Zone",
                 icon = "fa-solid fa-square",
-                action_type = "client_event",
+                action_type = "client",
                 action = "test_box_action",
                 params = {},
                 can_interact = function(player) return true end,
@@ -62,7 +62,7 @@ if config.testing then
             {
                 label = "Test Sphere Zone",
                 icon = "fa-solid fa-globe",
-                action_type = "client_event",
+                action_type = "client",
                 action = "test_sphere_action",
                 params = {},
                 can_interact = function(player) return true end
@@ -93,7 +93,7 @@ if config.testing then
                 {
                     label = "Test Model",
                     icon = "fa-solid fa-coffee",
-                    action_type = "client_event",
+                    action_type = "client",
                     action = "your_event_name",
                     params = {},
                     can_interact = function(entity)
@@ -125,7 +125,7 @@ if config.testing then
                     {
                         label = "Test Entity Zone",
                         icon = "fa-solid fa-car",
-                        action_type = "client_event",
+                        action_type = "client",
                         action = "your_event_name_for_vehicle",
                         params = {},
                         can_interact = function(entity)
