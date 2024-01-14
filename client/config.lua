@@ -18,7 +18,7 @@ targets.zones.entity = targets.zones.entity or {}
 targets.zones.models = targets.zones.models or {}
 
 -- Testing stuff -- can be removed if removing `client/test.lua` or just leave false and ignore.. will be removed once script is no longer a W.I.P
-config.testing = true
+config.testing = false
 testing_peds = {}
 testing_ents = {}
 
@@ -30,7 +30,11 @@ config.raycast_distance = 10.0
 
 -- Target settings
 config.target = {
-    default_icon = 'fa-regular fa-circle'
+    default_icon = 'fa-regular fa-circle',
+    keys = {
+        show_target = 'lmenu',
+        menu_open = 'mouse1' -- Refer to utils.keys for key list
+    }
 }
 
 -- Default bones
@@ -59,7 +63,7 @@ config.bones = {
 -- Default actions
 config.default_actions = {
     vehicles = true, -- Toggle if default vehicle actions should be used or not. Defaults: Toggle doors, flip vehicle, push vehicle.
-    players = false, -- Toggle if default player actions should be used or not. . Defaults: none currently
-    peds = false, -- Toggle if default ped actions should be used or not. . Defaults: none currently
-    zones = false -- Toggle if default zone actions should be used. Defaults: none currently
+    players = true, -- Toggle if default player actions should be used or not. . Defaults: none currently
+    peds = true, -- Toggle if default ped actions should be used or not. . Defaults: none currently
+    zones = true -- Toggle if default zone actions should be used. Defaults: none currently
 }
