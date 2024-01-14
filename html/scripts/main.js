@@ -8,6 +8,7 @@ let test_menu_data = [
     {
         label: "Test Action 1",
         icon: "fa-solid fa-door-closed",
+        colour: 'red',
         action_type: "client_event",
         action: 'boii_target:cl:toggle_vehicle_door',
         params: { door_index: 0 },
@@ -25,6 +26,7 @@ let test_menu_data = [
         label: "Test Action 3",
         icon: "fa-solid fa-key",
         action_type: "client_event",
+        colour: 'green',
         action: 'boii_target:cl:toggle_vehicle_door',
         params: { door_index: 2 },
         distance: 0.6
@@ -32,6 +34,7 @@ let test_menu_data = [
     {
         label: "Test Action 4",
         icon: "fa-solid fa-tools",
+        colour: 'purple',
         action_type: "client_event",
         action: 'boii_target:cl:toggle_vehicle_door',
         params: { door_index: 3 },
@@ -127,6 +130,10 @@ function activate_target(icon) {
 function deactivate_target() {
     $('#target').removeClass('active').addClass('inactive');
     $('#target i').attr('class', default_icon);
+    let menu_left = $('.actions.left');
+    let menu_right = $('.actions.right');
+    menu_left.empty();
+    menu_right.empty();
     is_target_active = false;
 }
 
@@ -153,21 +160,24 @@ function populate_dropdown_with_actions(actions) {
     menu_right.empty();
     actions.forEach((action, index) => {
         let action_html = $(`<div class="action" data-id="${action.label}"></div>`);
-        action_html.html(`
-            <div class="label_container">${index % 2 === 0 ? action.label : ''}<i class="${action.icon}"></i>${index % 2 !== 0 ? action.label : ''}</div>
-        `);
+        let colour = action.colour || '#b4b4b4';
+        let label_html = `<span class="label" style="border: 2px solid ${colour}; color: ${colour};">${action.label}</span>`;
+        let icon_html = `<span class="icon" style="border: 2px solid ${colour}; color: ${colour};"><i class="${action.icon}"></i></span>`;
+
         if (index % 2 === 0) {
+            action_html.html(`<div class="label_container">${label_html}${icon_html}</div>`);
             menu_left.append(action_html);
         } else {
+            action_html.html(`<div class="label_container">${icon_html}${label_html}</div>`);
             menu_right.append(action_html);
         }
     });
     adjust_action_positions(menu_left, menu_right);
-    is_menu_active = true
+    is_menu_active = true;
 }
 
+
 function handle_action_click(action_id, action_name) {
-    console.log(`Clicked on Action with ID ${action_id}: ${action_name}`);
     const selected_action = menu_data.find(action => action.label === action_id);
     if (selected_action) {
         $.post(`https://${GetParentResourceName()}/trigger_action_event`, JSON.stringify({
