@@ -219,7 +219,8 @@ test_entity_zone()
 ```
 
 ### PREVIEW
-coming soon maybe.. is not really required.
+![image](https://github.com/boiidevelopment/boii_target/assets/90377400/05e87368-5ba6-4dd3-8c53-86572b9e1178)
+
 
 ### SUPPORT
 https://discord.gg/boiidevelopment
