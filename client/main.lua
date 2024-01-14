@@ -6,7 +6,6 @@
 utils = exports['boii_utils']:get_utils()
 
 -- Locals
-local player_ped = PlayerPedId()
 local is_targeting = false
 
 -- Function to handle debug logging
@@ -38,8 +37,8 @@ local function ray_cast_game_play_camera(max_distance)
         y = new_cam_coord.y + direction.y * max_distance,
         z = new_cam_coord.z + direction.z * max_distance
     }
-    local player_pos = GetEntityCoords(player_ped)
-    local _, hit, coords, _, entity = GetShapeTestResult(StartShapeTestRay(new_cam_coord.x, new_cam_coord.y, new_cam_coord.z, destination.x, destination.y, destination.z, -1, player_ped, 0))
+    local player_pos = GetEntityCoords(PlayerPedId())
+    local _, hit, coords, _, entity = GetShapeTestResult(StartShapeTestRay(new_cam_coord.x, new_cam_coord.y, new_cam_coord.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 0))
     if hit then
         local entity_pos = GetEntityCoords(entity)
         local distance = utils.geometry.distance_3d(player_pos, entity_pos)
@@ -81,6 +80,7 @@ end
 
 -- Function to check a target entity for registered actions
 local function check_entity_for_actions(entity, hit_coords)
+    if not DoesEntityExist(entity) then return false, nil end
     local entity_type = GetEntityType(entity)
     local entity_model = GetEntityModel(entity)
     local model_options = targets.zones.models[entity_model]
@@ -95,12 +95,12 @@ local function check_entity_for_actions(entity, hit_coords)
             return true, model_options.actions, model_options.icon
         end
     end
-    if entity_type == 1 then -- Pedestrian
+    if entity_type == 1 then
         local actions, zone = (IsPedAPlayer(entity)) and get_closest_bone(entity, hit_coords, targets.players) or get_closest_bone(entity, hit_coords, targets.peds)
         if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
             return true, actions, zone.icon
         end
-    elseif entity_type == 2 then -- Vehicle
+    elseif entity_type == 2 then
         local actions, zone = get_closest_bone(entity, hit_coords, targets.vehicles)
         if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
             return true, actions, zone.icon
@@ -137,7 +137,7 @@ end
 -- Function to draw debug line
 local function draw_debug_line()
     while is_targeting and config.debug do
-        local player_pos = GetEntityCoords(player_ped)
+        local player_pos = GetEntityCoords(PlayerPedId())
         local cam_rot, cam_coord = get_camera_details()
         local direction = utils.geometry.rotation_to_direction(cam_rot)
         local new_cam_coord = vector3(cam_coord.x, cam_coord.y, cam_coord.z + 0.6)
@@ -187,7 +187,19 @@ end
 local function handle_targeting()
     local has_focus = false
     CreateThread(draw_debug_line)
-    CreateThread(disabled_controls)
+    CreateThread(function()
+        while is_targeting do 
+            SetPauseMenuActive(false)
+            DisableAllControlActions(0)
+            EnableControlAction(0, 30, true)
+            EnableControlAction(0, 31, true)
+            if not has_focus then
+                EnableControlAction(0, 1, true)
+                EnableControlAction(0, 2, true)
+            end
+            Wait(0)
+        end
+    end)
     while is_targeting do
         local hit, coords, hit_entity, raycast_coords = ray_cast_game_play_camera(config.raycast_distance)
         local is_target, actions, icon, targeted_entity = false, nil, nil, nil
@@ -196,13 +208,14 @@ local function handle_targeting()
             targeted_entity = hit_entity
         else
             is_target, actions, icon = check_zones_for_actions(raycast_coords)
-            targeted_entity = nil  -- No specific entity for zones
+            targeted_entity = nil
         end
         if is_target then
             local target_icon = icon or config.target.default_icon
             local interactable_actions = filter_interactable_actions(actions, targeted_entity)
             SendNUIMessage({ action = 'activate_target', icon = target_icon })
-            if IsDisabledControlPressed(0, 238) and actions then
+            local key = utils.keys.get_key(config.target.keys.menu_open)
+            if IsDisabledControlPressed(0, key) and actions then
                 SetCursorLocation(0.5, 0.5)
                 SetNuiFocus(true, true)
                 SetNuiFocusKeepInput(true)
@@ -232,7 +245,7 @@ local function draw_sprite(options)
             else
                 current_coords = options.coords
             end
-            local player_coords = GetEntityCoords(player_ped)
+            local player_coords = GetEntityCoords(PlayerPedId())
             local distance = #(player_coords - current_coords)
             if distance < render_distance then
                 local r, g, b, a = table.unpack(options.colour or {255, 255, 255, 255})
@@ -251,7 +264,7 @@ local function draw_debug(zone_type, options)
     local render_distance = 50.0
     CreateThread(function()
         while options.debug do
-            local player_coords = GetEntityCoords(player_ped)
+            local player_coords = GetEntityCoords(PlayerPedId())
             local distance = #(player_coords - options.coords)
             if distance < render_distance then
                 if zone_type == 'circle' then
@@ -342,15 +355,12 @@ local function add_entity_zone(entities, options)
             local width = (max.x - min.x) * size_modifier.x
             local height = (max.z - min.z) * size_modifier.z
             local pos = GetEntityCoords(entity)
-
             options.entity = entity
             options.coords = pos
             options.length = length
             options.width = width
             options.height = height
-
             targets.zones.entity[entity] = options
-
             if options.debug then
                 draw_debug('entity', options)
             end
@@ -396,8 +406,9 @@ end)
     KEYMAPPING
 ]]
 
--- Register key mapping for toggling targeting
-RegisterKeyMapping('+toggle_target', 'Toggle target.', 'keyboard', 'LMENU')
+-- Register key mapping for toggling targeting-
+RegisterKeyMapping('+toggle_target', 'Toggle target.', 'keyboard', config.target.keys.show_target)
+
 
 -- Register command for enabling targeting
 RegisterCommand('+toggle_target', function()
