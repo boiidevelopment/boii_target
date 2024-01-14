@@ -29,18 +29,20 @@ body {
 .active {
     color: var(--active-colour);
     text-shadow: var(--active-textshadow);
+    opacity: 1;
 }
 
 .inactive {
     color: var(--inactive-colour);
     text-shadow: var(--inactive-textshadow);
+    opacity: 0.8;
 }
 
 .actions.left, 
 .actions.right {
     display: flex;
     flex-direction: column;
-    margin: 0 10px;
+    margin: 0 20px;
     flex: 1;
 }
 
@@ -54,7 +56,7 @@ body {
 
 .action {
     border-radius: 15px;
-    padding: 10px;
+    padding: 5px;
     font-weight: bold;
     display: flex;
     position: relative;
@@ -65,27 +67,40 @@ body {
     display: inline-flex;
     align-items: center;
     text-align: center;
-    color: var(--dropdown-colour);
-    text-shadow: var(--dropdown-textshadow);
-    font-size: var(--dropdown-font-size);
     white-space: nowrap;
     width: fit-content;
     border-radius: 10px;
+    justify-content: space-between;
+    gap: 15px;
+    opacity: 0.8;
 }
 
-.action .label_container i {
-    margin: 0 10px;
+.action .label_container:hover {
+    opacity: 1;
 }
 
-.action:hover .label_container {
-    color: var(--dropdown-hover-colour);
-    text-shadow: var(--dropdown-hover-textshadow);
+.action .label {
+    background: rgba(0, 0, 0, 0.9);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+    width: fit-content;
+    font-size: 0.8rem;
 }
 
-.action i {
-    color: var(--dropdown-icon-colour);
+.action .icon {
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 50px;
+    padding: 6px;
+    margin: 0;
+    align-items: center;
+    text-align: center;
+    font-size: 0.8rem;
 }
 
-.action:hover i {
-    color: var(--dropdown-icon-hover-colour);
+.action:hover .icon {
+    
 }
