@@ -67,7 +67,7 @@ Once the above line has been added you can then use the following functions with
     exports('add_model', add_model)
 ```
 
-2. Example usage:
+3. Example usage:
 
 - Circle zone
 
@@ -84,8 +84,8 @@ target.add_circle_zone({
         {
             label = "Test Circle Zone",
             icon = "fa-solid fa-circle",
-            action_type = "client_event",
-            action = "test_circle_action",
+            action_type = "client", -- 'client' 'server' 'function'
+            action = "your_event_name", -- if type = client/server use an event here | if type = 'function' use a function e.g. actions = function() ... end
             params = {},
             can_interact = function(player) return true end,
         }
@@ -111,8 +111,8 @@ target.add_box_zone({
         {
             label = "Test Box Zone",
             icon = "fa-solid fa-square",
-            action_type = "client_event",
-            action = "test_box_action",
+            action_type = "client",
+            action = "your_event_name",
             params = {},
             can_interact = function(player) return true end,
         }
@@ -135,8 +135,8 @@ target.add_sphere_zone({
         {
             label = "Test Sphere Zone",
             icon = "fa-solid fa-globe",
-            action_type = "client_event",
-            action = "test_sphere_action",
+            action_type = "client",
+            action = "your_event_name",
             params = {},
             can_interact = function(player) return true end
         }
@@ -170,7 +170,7 @@ local function test_add_model()
             {
                 label = "Test Model",
                 icon = "fa-solid fa-coffee",
-                action_type = "client_event",
+                action_type = "client",
                 action = "your_event_name",
                 params = {},
                 can_interact = function(entity)
@@ -206,8 +206,8 @@ local function test_entity_zone()
                 {
                     label = "Test Entity Zone",
                     icon = "fa-solid fa-car",
-                    action_type = "client_event",
-                    action = "your_event_name_for_vehicle",
+                    action_type = "client",
+                    action = "your_event_name",
                     params = {},
                     can_interact = function(entity)
                         return entity == vehicle 
