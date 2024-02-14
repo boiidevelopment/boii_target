@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility: Target'
 
-version '0.1.0'
+version '0.2.0'
 
 lua54 'yes'
 
@@ -28,6 +28,9 @@ client_scripts {
     'client/export.lua',
 }
 
+server_script 'server/version.lua'
+
 escrow_ignore {
-    'client/**/*'
+    'client/**/*',
+    'server/*'
 }
