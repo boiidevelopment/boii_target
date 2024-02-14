@@ -33,7 +33,7 @@ function call_registered_function(label)
     if registered_functions[label] then
         registered_functions[label]()
     else
-        print("Function with label " .. label .. " not found.")
+        print('Function with label ' .. label .. ' not found.')
     end
 end
 
@@ -126,10 +126,7 @@ local function check_zones_for_actions(coords)
             elseif zone_type == 'sphere' then
                 in_zone = utils.geometry.is_point_in_sphere(coords, zone.coords, zone.radius)
             elseif zone_type == 'box' then
-                in_zone = utils.geometry.is_point_in_box(coords, {
-                    x = zone.coords.x, y = zone.coords.y, z = zone.coords.z,
-                    width = zone.width, height = zone.height, depth = zone.depth
-                })
+                in_zone = utils.geometry.is_point_in_oriented_box(coords, zone)
             end
             if in_zone then
                 if (not zone.actions.can_interact or zone.actions.can_interact()) then
@@ -321,12 +318,12 @@ local function draw_sprite(options)
             if distance < render_distance then
                 local r, g, b, a = table.unpack(options.colour or {255, 255, 255, 255})
                 SetDrawOrigin(current_coords.x, current_coords.y, current_coords.z, 0)
-                DrawSprite("shared", "emptydot_32", 0, 0, 0.02, 0.035, 0, r, g, b, a)
+                DrawSprite('shared', 'emptydot_32', 0, 0, 0.02, 0.035, 0, r, g, b, a)
                 ClearDrawOrigin()
             end
             Wait(0)
         end
-        SetStreamedTextureDictAsNoLongerNeeded("shared")
+        SetStreamedTextureDictAsNoLongerNeeded('shared')
     end)
 end
 
@@ -457,7 +454,7 @@ end
 --- Adds a target model to the targets.
 -- @function add_model
 -- @param models table: The models for which the targets are created.
--- @param options table: Options for the target model.
+-- @param options table: Options for the target model, including actions and interaction details.
 local function add_model(models, options)
     targets.zones.models = targets.zones.models or {}
     for _, model in ipairs(models) do
@@ -466,12 +463,50 @@ local function add_model(models, options)
     end
 end
 
+--- Adds a player interaction target based on a specific bone.
+-- @function add_player
+-- @param bone string: The bone name to attach the interaction to (e.g., 'head' for talking, 'hand_l' for trading).
+-- @param options table: A table containing the interaction details such as ID, icon, distance, and actions to be taken.
+local function add_player(bone, options)
+    targets.players = targets.players or {}
+    targets.players[bone] = options
+end
+
+--- Adds a vehicle interaction target based on a specific bone.
+-- @function add_vehicle
+-- @param bone string: The bone name to attach the interaction to (e.g., 'door_dside_f' for the driver's door).
+-- @param options table: A table containing the interaction details such as ID, icon, distance, and actions to be taken.
+local function add_vehicle(bone, options)
+    targets.vehicles = targets.vehicles or {}
+    targets.vehicles[bone] = options
+end
+
+-- Removes a target based on ID from any target category.
+-- @param targetId string: The ID of the target to remove.
+local function remove_target(targetId)
+    -- A helper function to remove target from a specific collection
+    local function remove(collection)
+        if collection[targetId] then
+            collection[targetId] = nil
+            return true
+        end
+        return false
+    end
+    if remove(targets.vehicles) then return end
+    if remove(targets.peds) then return end
+    if remove(targets.players) then return end
+    for _, zoneType in pairs({ 'circle', 'box', 'sphere', 'entity', 'models' }) do
+        if remove(targets.zones[zoneType]) then return end
+    end
+    print('Target with ID: '..targetId..' not found in any category.')
+end
+
 --- @section NUI Callbacks
 
 --- Handles the event when NUI is exited.
 -- @event exit_nui
 RegisterNUICallback('exit_nui', function()
-    if config.debug then debug_log('debug', 'exit_nui fired') end
+    debug_log('info', 'exit_nui fired')
     has_focus = false
     SetNuiFocus(false, false)
 	SetNuiFocusKeepInput(false)
@@ -483,7 +518,7 @@ end)
 -- @param cb function: Callback function to handle the response.
 RegisterNUICallback('trigger_action_event', function(data, cb)
     if not data or not data.action then
-        print("Error: 'data' or 'data.action' is nil.")
+        debug_log('err', 'Error: '..data..' or '..data.action..' is nil.')
         return
     end
     if data.action_type == 'function' then
@@ -491,13 +526,9 @@ RegisterNUICallback('trigger_action_event', function(data, cb)
     elseif data.action_type == 'server' then
         TriggerServerEvent(data.action, data.params)
     elseif data.action_type == 'client' then
-        if type(data.params) == 'table' or data.params == nil then
-            TriggerEvent(data.action, data.params)
-        else
-            print("Error: 'data.params' is expected to be a table or nil.")
-        end
+        TriggerEvent(data.action, data.params)
     else
-        print("Error: Unknown 'action_type'.")
+        debug_log('err', 'Error: Unknown action_type.')
     end
     SetNuiFocus(false, false)
     if cb then
@@ -558,6 +589,9 @@ target.add_box_zone = add_box_zone
 target.add_sphere_zone = add_sphere_zone
 target.add_entity_zone = add_entity_zone
 target.add_model = add_model
+target.add_player = add_player
+target.add_vehicle = add_vehicle
+target.remove_target = remove_target
 
 --- @section Exports
 
@@ -566,3 +600,6 @@ exports('add_box_zone', add_box_zone)
 exports('add_sphere_zone', add_sphere_zone)
 exports('add_entity_zone', add_entity_zone)
 exports('add_model', add_model)
+exports('add_player', add_player)
+exports('add_vehicle', add_vehicle)
+exports('remove_target', remove_target)
