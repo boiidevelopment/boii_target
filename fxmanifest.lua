@@ -9,7 +9,7 @@ author 'boiidevelopment'
 
 description 'BOII | Development - Utility: Target'
 
-version '0.2.0'
+version '0.2.1'
 
 lua54 'yes'
 
