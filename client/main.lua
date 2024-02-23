@@ -217,30 +217,50 @@ local function disabled_controls()
     until not is_targeting
 end
 
---- Filters interactable actions and registers function actions.
+--- Filters interactable actions based on item possession and registers function actions.
 -- @function filter_interactable_actions
 -- @param actions table: The actions to filter.
 -- @param entity number: The entity for which the actions are filtered.
--- @return table: Returns interactable actions.
-local function filter_interactable_actions(actions, entity)
+-- @param callback function: The callback function that receives the filtered interactable actions.
+local function filter_interactable_actions(actions, entity, callback)
     local interactable_actions = {}
-    for _, action in ipairs(actions) do
-        if not action.can_interact or action.can_interact(entity) then
-            local action_copy = {}
-            for key, value in pairs(action) do
-                if key ~= 'can_interact' then
-                    action_copy[key] = value
-                end
-            end
-            if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
-                local func_identifier = action_copy.label
-                register_function(func_identifier, action_copy.action)
-                action_copy.action = func_identifier
-            end
-            interactable_actions[#interactable_actions + 1] = action_copy
+    local checks_pending = 0
+    local function check_complete()
+        checks_pending = checks_pending - 1
+        if checks_pending <= 0 then
+            callback(interactable_actions)
         end
     end
-    return interactable_actions
+    for _, action in ipairs(actions) do
+        if not action.can_interact or action.can_interact(entity) then
+            if action.item then
+                checks_pending = checks_pending + 1
+                utils.fw.has_item(action.item, action.item_amount or 1, function(has_item)
+                    if has_item then
+                        local action_copy = utils.tables.deep_copy(action)
+                        if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
+                            local func_identifier = action_copy.label
+                            register_function(func_identifier, action_copy.action)
+                            action_copy.action = func_identifier
+                        end
+                        interactable_actions[#interactable_actions + 1] = action_copy
+                    end
+                    check_complete()
+                end)
+            else
+                local action_copy = utils.tables.deep_copy(action)
+                if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
+                    local func_identifier = action_copy.label
+                    register_function(func_identifier, action_copy.action)
+                    action_copy.action = func_identifier
+                end
+                interactable_actions[#interactable_actions + 1] = action_copy
+            end
+        end
+    end
+    if #actions == 0 or checks_pending == 0 then
+        callback(interactable_actions)
+    end
 end
 
 --- Handles targeting.
@@ -260,41 +280,25 @@ local function handle_targeting()
             is_target, actions, icon = check_zones_for_actions(raycast_coords)
         end
         if is_target then
-            local action_copy = actions[1] -- Assuming there's only one action
-            if action_copy and action_copy.item and type(action_copy.item) == 'string' then
-                utils.fw.has_item(action_copy.item, action_copy.item_amount or 1, function(success)
-                    if success then
-                        local target_icon = icon or config.target.default_icon
-                        local interactable_actions = filter_interactable_actions(actions, targeted_entity)
-                        SendNUIMessage({ action = 'activate_target', icon = target_icon })
-                        local key = utils.keys.get_key(config.target.keys.menu_open)
-                        if IsDisabledControlPressed(0, key) and actions and not has_focus then
-                            SetCursorLocation(0.5, 0.5)
-                            SetNuiFocus(true, true)
-                            SetNuiFocusKeepInput(true)
-                            SendNUIMessage({ action = 'populate_actions', data = interactable_actions })
-                            has_focus = true
-                        end
-                    else
-                        SendNUIMessage({ action = 'deactivate_target' })
+            filter_interactable_actions(actions, targeted_entity, function(filtered_actions)
+                if #filtered_actions > 0 then
+                    local target_icon = icon or config.target.default_icon
+                    SendNUIMessage({ action = 'activate_target', icon = target_icon })
+                    local key = utils.keys.get_key(config.target.keys.menu_open)
+                    if IsDisabledControlPressed(0, key) and not has_focus then
+                        SetCursorLocation(0.5, 0.5)
+                        SetNuiFocus(true, true)
+                        SetNuiFocusKeepInput(true)
+                        SendNUIMessage({ action = 'populate_actions', data = filtered_actions })
+                        has_focus = true
                     end
-                end)
-            else
-                local target_icon = icon or config.target.default_icon
-                local interactable_actions = filter_interactable_actions(actions, targeted_entity)
-                SendNUIMessage({ action = 'activate_target', icon = target_icon })
-                local key = utils.keys.get_key(config.target.keys.menu_open)
-                if IsDisabledControlPressed(0, key) and actions and not has_focus then
-                    SetCursorLocation(0.5, 0.5)
-                    SetNuiFocus(true, true)
-                    SetNuiFocusKeepInput(true)
-                    SendNUIMessage({ action = 'populate_actions', data = interactable_actions })
-                    has_focus = true
+                else
+                    SendNUIMessage({ action = 'deactivate_target' })
                 end
-            end
+            end)
         else
             SendNUIMessage({ action = 'deactivate_target' })
-        end
+        end            
         Wait(100)
     end
 end
