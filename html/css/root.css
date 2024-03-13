@@ -1,0 +1,27 @@
+/*
+     ____   ____ _____ _____   _   _____  ________      ________ _      ____  _____  __  __ ______ _   _ _______ 
+    |  _ \ / __ \_   _|_   _| | | |  __ \|  ____\ \    / /  ____| |    / __ \|  __ \|  \/  |  ____| \ | |__   __|
+    | |_) | |  | || |   | |   | | | |  | | |__   \ \  / /| |__  | |   | |  | | |__) | \  / | |__  |  \| |  | |   
+    |  _ <| |  | || |   | |   | | | |  | |  __|   \ \/ / |  __| | |   | |  | |  ___/| |\/| |  __| | . ` |  | |   
+    | |_) | |__| || |_ _| |_  | | | |__| | |____   \  /  | |____| |___| |__| | |    | |  | | |____| |\  |  | |   
+    |____/ \____/_____|_____| | | |_____/|______|   \/   |______|______\____/|_|    |_|  |_|______|_| \_|  |_|   
+                              | |                                                                                
+                              |_|                 TARGET
+*/
+
+:root {
+    --target-icon-size: 1.2rem; /* size of the target icon */
+    --active-colour: rgba(180, 180, 180, 1); /* colour of icon whilst active */
+    --active-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* icon text shadow when active */
+    --inactive-colour: rgba(180, 180, 180, 0.7); /* colour of icon whilst inactive */
+    --inactive-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* icon text shadow when inactive */
+    --dropdown-font-size: 1.0rem; /* size of dropdown text */
+    --dropdown-icon-size: 1.2rem; /* size of dropdown icons */
+    --dropdown-colour: rgba(180, 180, 180, 0.7); /* colour of drop down text */
+    --dropdown-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* colour of drop down text */
+    --dropdown-icon-colour: rgba(180, 180, 180, 0.7); /* colour of drop down icons */
+    --dropdown-icon-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* colour of drop down icon shadow */
+    --dropdown-icon-hover-colour: rgba(180, 180, 180, 1); /* colour of drop down icon on hover */
+    --dropdown-hover-colour: rgba(180, 180, 180, 1); /* colour of drop down icons */
+    --dropdown-hover-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* colour of hover shadow */
+}
