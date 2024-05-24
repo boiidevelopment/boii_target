@@ -13,7 +13,7 @@ fx_version 'cerulean'
 games { 'gta5', 'rdr3' }
 
 name 'boii_target'
-version '0.3.0'
+version '0.4.0'
 description 'BOII | Development - Target'
 author 'boiidevelopment'
 repository 'https://github.com/boiidevelopment/boii_target'
