@@ -11,13 +11,13 @@
 
 :root {
     --target-icon-size: 1.2rem; /* size of the target icon */
-    --active-colour: rgba(180, 180, 180, 1); /* colour of icon whilst active */
+    --active-colour: white; /* colour of icon whilst active */
     --active-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* icon text shadow when active */
-    --inactive-colour: rgba(180, 180, 180, 0.7); /* colour of icon whilst inactive */
+    --inactive-colour: #b4b4b4; /* colour of icon whilst inactive */
     --inactive-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* icon text shadow when inactive */
     --dropdown-font-size: 1.0rem; /* size of dropdown text */
     --dropdown-icon-size: 1.2rem; /* size of dropdown icons */
-    --dropdown-colour: rgba(180, 180, 180, 0.7); /* colour of drop down text */
+    --dropdown-colour: #b4b4b4; /* colour of drop down text */
     --dropdown-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* colour of drop down text */
     --dropdown-icon-colour: rgba(180, 180, 180, 0.7); /* colour of drop down icons */
     --dropdown-icon-textshadow: -1px -1px 1px rgba(0, 0, 0, 1), 1px -1px 1px rgba(0, 0, 0, 1), -1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 1px rgba(0, 0, 0, 1); /* colour of drop down icon shadow */
