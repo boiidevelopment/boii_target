@@ -53,8 +53,8 @@ end
 -- @param type string: The type of debug message.
 -- @param message string: The debug message.
 function debug_log(type, message)
-    if config.debug and utils.debugging[type] then
-        utils.debugging[type](message)
+    if config.debug and utils.debug[type] then
+        utils.debug[type](message)
     end
 end
 
@@ -89,40 +89,86 @@ local function get_closest_bone(entity, hit_coords, targets_table)
     end
 end
 
+--- Checks if the entity type is disabled.
+-- @function is_disabled_type
+-- @param entity number: The entity to check.
+-- @param disabled_types table: The list of disabled types.
+-- @return boolean: Returns true if the entity type is disabled, false otherwise.
+local function is_disabled_type(entity, disabled_types)
+    local entity_type = GetPedType(entity)
+    for _, type in ipairs(disabled_types) do
+        if entity_type == type then
+            return true
+        end
+    end
+    return false
+end
+
+--- Gets the closest zone for a targeted entity.
+-- @function get_closest_zone_from_targets
+-- @param entity number: The targeted entity.
+-- @param targets_table table: The targets table.
+-- @return table, table: Returns the closest zone actions and the closest zone.
+local function get_closest_zone_from_targets(entity, targets_table)
+    for _, zone in ipairs(targets_table) do
+        if not is_disabled_type(entity, zone.disabled_types or {}) then
+            return zone.actions, zone
+        end
+    end
+    return nil, nil
+end
+
 --- Checks a target entity for registered actions.
 -- @function check_entity_for_actions
 -- @param entity number: The targeted entity.
 -- @param hit_coords table: The hit coordinates.
--- @return boolean, table, string: Returns if it's a target, actions, and icon.
+-- @return boolean, table, string, table: Returns if it's a target, actions, icon, and zone/model details.
 local function check_entity_for_actions(entity, hit_coords)
-    if not DoesEntityExist(entity) then return false, nil end
+    if not DoesEntityExist(entity) then
+        return false, nil, nil, nil
+    end
     local entity_type = GetEntityType(entity)
     local entity_model = GetEntityModel(entity)
     local model_options = targets.zones.models[entity_model]
     local entity_zone_options = targets.zones.entity[entity]
+
     if entity_zone_options then
         if entity_zone_options.actions and (not entity_zone_options.actions.can_interact or entity_zone_options.actions.can_interact()) then
             return true, entity_zone_options.actions, entity_zone_options.icon, entity_zone_options
         end
     end
+
     if model_options then
         if model_options.actions and (not model_options.actions.can_interact or model_options.actions.can_interact()) then
             return true, model_options.actions, model_options.icon, model_options
         end
     end
+
     if entity_type == 1 then
-        local actions, zone = (IsPedAPlayer(entity)) and get_closest_bone(entity, hit_coords, targets.players) or get_closest_bone(entity, hit_coords, targets.peds)
+        if IsPedAPlayer(entity) then
+            local actions, zone = get_closest_zone_from_targets(entity, targets.players)
+            if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
+                return true, actions, zone.icon, zone
+            end
+        else
+            local actions, zone = get_closest_zone_from_targets(entity, targets.peds)
+            if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
+                return true, actions, zone.icon, zone
+            end
+        end    
+    elseif entity_type == 2 then
+        local actions, zone = get_closest_zone_from_targets(entity, targets.vehicles)
         if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
             return true, actions, zone.icon, zone
         end
-    elseif entity_type == 2 then
-        local actions, zone = get_closest_bone(entity, hit_coords, targets.vehicles)
-        if actions and (not zone.actions.can_interact or zone.actions.can_interact()) then
-            return true, actions, zone.icon, zone
+    elseif entity_type == 3 then
+        if entity_zone_options then
+            return true, entity_zone_options.actions, entity_zone_options.icon, entity_zone_options
         end
     end
     return false, nil, nil, nil
 end
+
 
 --- Handles interactions in zones.
 -- @function check_zones_for_actions
@@ -133,7 +179,9 @@ local function check_zones_for_actions(coords)
         for _, zone in pairs(zones) do
             local in_zone = false
             if zone_type == 'circle' then
-                in_zone = utils.geometry.is_point_in_circle({x = coords.x, y = coords.y}, zone.coords, zone.radius)
+                local start_point = {x = GetEntityCoords(PlayerPedId()).x, y = GetEntityCoords(PlayerPedId()).y}
+                local end_point = {x = coords.x, y = coords.y}
+                in_zone = utils.geometry.line_intersects_circle(start_point, end_point, zone.coords, zone.radius)
             elseif zone_type == 'sphere' then
                 in_zone = utils.geometry.is_point_in_sphere(coords, zone.coords, zone.radius)
             elseif zone_type == 'box' then
@@ -146,7 +194,7 @@ local function check_zones_for_actions(coords)
             end
         end
     end
-    return false, nil
+    return false, nil, nil, nil
 end
 
 --- Performs a ray cast from the gameplay camera.
@@ -154,18 +202,8 @@ end
 -- @param max_distance number: The maximum distance for the raycast.
 -- @return boolean, table, number, table: Returns if hit, hit coordinates, entity, and destination.
 local function rotation_to_direction(rotation)
-	local adjust_rot =
-	{
-		x = (math.pi / 180) * rotation.x,
-		y = (math.pi / 180) * rotation.y,
-		z = (math.pi / 180) * rotation.z
-	}
-	local direction =
-	{
-		x = -math.sin(adjust_rot.z) * math.abs(math.cos(adjust_rot.x)),
-		y = math.cos(adjust_rot.z) * math.abs(math.cos(adjust_rot.x)),
-		z = math.sin(adjust_rot.x)
-	}
+	local adjust_rot = { x = (math.pi / 180) * rotation.x, y = (math.pi / 180) * rotation.y, z = (math.pi / 180) * rotation.z }
+	local direction = { x = -math.sin(adjust_rot.z) * math.abs(math.cos(adjust_rot.x)), y = math.cos(adjust_rot.z) * math.abs(math.cos(adjust_rot.x)), z = math.sin(adjust_rot.x)}
 	return direction
 end
 
@@ -173,12 +211,7 @@ local function ray_cast_game_play_camera(distance)
     local cam_rot = GetGameplayCamRot()
 	local cam_coords = GetGameplayCamCoord()
 	local direction = rotation_to_direction(cam_rot)
-	local destination =
-	{
-		x = cam_coords.x + direction.x * distance,
-		y = cam_coords.y + direction.y * distance,
-		z = cam_coords.z + direction.z * distance
-	}
+	local destination = { x = cam_coords.x + direction.x * distance, y = cam_coords.y + direction.y * distance, z = cam_coords.z + direction.z * distance }
     local player_pos = GetEntityCoords(PlayerPedId())
 	local _, hit, coords, _, entity = GetShapeTestResult(StartShapeTestRay(cam_coords.x, cam_coords.y, cam_coords.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 0))
 	if hit then
@@ -238,32 +271,38 @@ local function filter_interactable_actions(actions, entity, callback)
             callback(interactable_actions)
         end
     end
+
+    -- Ensure actions is an array
+    if actions and not actions[1] then
+        actions = {actions}
+    end
+
     for _, action in ipairs(actions) do
-            if not action.can_interact or action.can_interact(entity) then
-                if action.item then
-                    checks_pending = checks_pending + 1
-                    utils.fw.has_item(action.item, action.item_amount or 1, function(has_item)
-                        if has_item then
-                            local action_copy = utils.tables.deep_copy(action)
-                            if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
-                                local func_identifier = action_copy.label
-                                register_function(func_identifier, action_copy.action)
-                                action_copy.action = func_identifier
-                            end
-                            interactable_actions[#interactable_actions + 1] = action_copy
+        if not action.can_interact or action.can_interact(entity) then
+            if action.item then
+                checks_pending = checks_pending + 1
+                utils.fw.has_item(action.item, action.item_amount or 1, function(has_item)
+                    if has_item then
+                        local action_copy = utils.tables.deep_copy(action)
+                        if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
+                            local func_identifier = action_copy.label
+                            register_function(func_identifier, action_copy.action)
+                            action_copy.action = func_identifier
                         end
-                        check_complete()
-                    end)
-                else
-                    local action_copy = utils.tables.deep_copy(action)
-                    if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
-                        local func_identifier = action_copy.label
-                        register_function(func_identifier, action_copy.action)
-                        action_copy.action = func_identifier
+                        interactable_actions[#interactable_actions + 1] = action_copy
                     end
-                    interactable_actions[#interactable_actions + 1] = action_copy
+                    check_complete()
+                end)
+            else
+                local action_copy = utils.tables.deep_copy(action)
+                if action_copy.action_type == 'function' and type(action_copy.action) == 'function' then
+                    local func_identifier = action_copy.label
+                    register_function(func_identifier, action_copy.action)
+                    action_copy.action = func_identifier
                 end
+                interactable_actions[#interactable_actions + 1] = action_copy
             end
+        end
     end
     if #actions == 0 or checks_pending == 0 then
         callback(interactable_actions)
@@ -287,9 +326,9 @@ local function handle_targeting()
             is_target, actions, icon, target_zone = check_entity_for_actions(hit_entity, coords)
             targeted_entity = hit_entity
         else
-            is_target, actions, icon, target_zone = check_zones_for_actions(raycast_coords)
+            is_target, actions, icon, target_zone = check_zones_for_actions(interaction_point)
         end
-        if is_target and target_zone and distance_to_interaction <= (target_zone.distance or 10.0) then
+        if is_target and target_zone --[[and distance_to_interaction <= (target_zone.distance or 10.0)]] then
             filter_interactable_actions(actions, targeted_entity, function(filtered_actions)
                 if #filtered_actions > 0 then
                     local target_icon = icon or config.target.default_icon
@@ -442,10 +481,11 @@ end
 -- @param options table: Options for the entity zone including entity, coords, size modifier, debug state, and sprite state.
 local function add_entity_zone(entities, options)
     targets.zones.entity = targets.zones.entity or {}
-    local size_modifier = options.modifiers or {x = 0.0, y = 0.0, z = 0.0}
+    local size_modifier = options.modifiers or {x = 1.0, y = 1.0, z = 1.0}
     for _, entity in ipairs(entities) do
         if DoesEntityExist(entity) then
-            local min, max = GetModelDimensions(GetEntityModel(entity))
+            local model = GetEntityModel(entity)
+            local min, max = GetModelDimensions(model)
             local length = (max.y - min.y) * size_modifier.y
             local width = (max.x - min.x) * size_modifier.x
             local height = (max.z - min.z) * size_modifier.z
@@ -459,8 +499,9 @@ local function add_entity_zone(entities, options)
             if options.debug then
                 draw_debug('entity', options)
             end
+
             if options.sprite then
-                --draw_sprite(options)
+                draw_sprite(options)
             end
         end
     end
@@ -471,10 +512,10 @@ end
 -- @param models table: The models for which the targets are created.
 -- @param options table: Options for the target model, including actions and interaction details.
 local function add_model(models, options)
-    targets.zones.models = targets.zones.models or {}
+    targets.models = targets.models or {}
     for _, model in ipairs(models) do
         local hash = GetHashKey(model)
-        targets.zones.models[hash] = options
+        targets.models[hash] = options
     end
 end
 
@@ -484,7 +525,16 @@ end
 -- @param options table: A table containing the interaction details such as ID, icon, distance, and actions to be taken.
 local function add_player(bone, options)
     targets.players = targets.players or {}
-    targets.players[bone] = options
+    targets.peds[#targets.peds + 1] = options
+end
+
+--- Adds a ped interaction target based on a specific bone.
+-- @function add_vehicle
+-- @param bone string: The bone name to attach the interaction to (e.g., 'door_dside_f' for the driver's door).
+-- @param options table: A table containing the interaction details such as ID, icon, distance, and actions to be taken.
+local function add_ped(options)
+    targets.peds = targets.peds or {}
+    targets.peds[#targets.peds + 1] = options
 end
 
 --- Adds a vehicle interaction target based on a specific bone.
@@ -512,7 +562,6 @@ local function remove_target(target_id)
     for _, zone_type in pairs({ 'circle', 'box', 'sphere', 'entity', 'models' }) do
         if remove(targets.zones[zone_type]) then return end
     end
-    print('Target with ID: '..target_id..' not found in any category.')
 end
 
 --- @section NUI Callbacks
@@ -615,5 +664,6 @@ exports('add_sphere_zone', add_sphere_zone)
 exports('add_entity_zone', add_entity_zone)
 exports('add_model', add_model)
 exports('add_player', add_player)
+exports('add_ped', add_ped)
 exports('add_vehicle', add_vehicle)
 exports('remove_target', remove_target)
