@@ -23,12 +23,12 @@ targets = targets or {}
 targets.vehicles = targets.vehicles or {}
 targets.peds = targets.peds or {}
 targets.players = targets.players or {}
+targets.models = targets.models or {}
 targets.zones = targets.zones or {}
 targets.zones.circle = targets.zones.circle or {}
 targets.zones.box = targets.zones.box or {}
 targets.zones.sphere = targets.zones.sphere or {}
 targets.zones.entity = targets.zones.entity or {}
-targets.zones.models = targets.zones.models or {}
 
 --- Testing configurations (to be removed post-development)
 -- @field testing boolean: Enables or disables test mode
