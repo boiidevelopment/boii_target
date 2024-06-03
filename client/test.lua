@@ -184,5 +184,21 @@ if config.testing then
         end
     end
     test_entity_zone_function()
-    
+
+    local function test_add_ped()
+        target.add_ped({
+            icon = 'fa-solid fa-gear',
+            distance = 2.5,
+            disabled_types = { 28, 29, 30, 31 },
+            actions = {
+                label = 'Test Global Ped',
+                icon = 'fa-solid fa-comment',
+                action_type = 'client',
+                action = 'target:test_event',
+                params = {}
+            }
+        })
+    end
+
+    test_add_ped()
 end
